@@ -310,7 +310,15 @@ btn.innerHTML = "✅ माहिती जतन करा";
   } else if (total > 0 && diesel === 0) {
     remark = "⚠️ काम झाले पण डिझेल भरले नाही";
   }
-  
+ if (!subCode || !getValue("workType") || !getValue("projectName") ||
+    !getValue("machineType") || !getValue("machineName") ||
+    !getValue("staffName")) {
+
+  alert("❌ कृपया सर्व आवश्यक माहिती भरा.");
+  btn.disabled = false;
+  btn.innerHTML = "✅ माहिती जतन करा";
+  return;
+} 
 if (getEl("vehicleSection")?.style.display === "block") {
   if (!getValue("tripCount") || !getValue("locationFromTo")) {
     alert("❌ वाहनासाठी ट्रिप्स व स्थान माहिती आवश्यक आहे.");
