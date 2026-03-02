@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
   await loadConfig();
   populateSubdivisions();
+
+  // Listener DOM ready नंतर attach कर
+  document
+    .getElementById("subdivision")
+    .addEventListener("change", handleSubdivisionChange);
 });
 
 function populateSubdivisions() {
@@ -13,4 +18,9 @@ function populateSubdivisions() {
     opt.textContent = sub["Subdivision Name"];
     select.appendChild(opt);
   });
+}
+
+function handleSubdivisionChange() {
+  const subCode = document.getElementById("subdivision").value;
+  console.log("Selected Subdivision:", subCode);
 }
