@@ -157,10 +157,14 @@ function toggleFormFields(machineType) {
 
   if (!machineSection || !vehicleSection) return;
 
+  const type = machineType?.trim().toLowerCase();
+
   const isVehicle =
-    machineType === "टिपर" ||
-    machineType === "ट्रान्सपोर्टर" ||
-    machineType === "युटिलिटी वाहने";
+    type.includes("टिपर") ||
+    type.includes("transporter") ||
+    type.includes("ट्रान्सपोर्टर") ||
+    type.includes("utility") ||
+    type.includes("युटिलिटी");
 
   if (isVehicle) {
 
@@ -169,16 +173,6 @@ function toggleFormFields(machineType) {
 
     getEl("tripCount").required = true;
     getEl("locationFromTo").required = true;
-
-    getEl("dieselQty").value = "";
-    getEl("dieselTime").value = "";
-    getEl("dieselReading").value = "";
-
-    getEl("shift1Start").value = "";
-    getEl("shift1End").value = "";
-    getEl("shift2Start").value = "";
-    getEl("shift2End").value = "";
-    getEl("totalShiftHours").value = "";
 
   } else {
 
