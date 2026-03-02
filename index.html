@@ -6,127 +6,232 @@
   <title>यांत्रिकी मातीकाम माहिती प्रणाली</title>
 
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background: #f4f6f9;
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
+    :root{
+      --primary:#1e40af;
+      --bg:#f3f6fb;
+      --card:#ffffff;
+      --border:#d1d5db;
     }
 
-    h2 {
-      text-align: center;
-      color: #1e3a8a;
+    *{box-sizing:border-box;}
+
+    body{
+      font-family:system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      margin:0;
+      padding:20px;
+      max-width:900px;
+      margin:auto;
     }
 
-    label {
-      font-weight: 600;
+    h2{
+      text-align:center;
+      color:var(--primary);
+      margin-bottom:25px;
     }
 
-    select, input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    form{
+      background:var(--card);
+      padding:25px;
+      border-radius:12px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);
     }
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background: #2563eb;
-      color: white;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
     }
 
-    button:hover {
-      background: #1d4ed8;
+    .section{
+      display:flex;
+      flex-direction:column;
     }
 
-    .section {
-      margin-bottom: 18px;
+    label{
+      font-weight:600;
+      margin-bottom:5px;
+      font-size:14px;
+    }
+
+    select,input{
+      padding:8px;
+      border-radius:6px;
+      border:1px solid var(--border);
+      font-size:14px;
+    }
+
+    input[readonly]{
+      background:#eef2ff;
+      font-weight:600;
+    }
+
+    button{
+      margin-top:25px;
+      padding:12px;
+      width:100%;
+      border:none;
+      border-radius:8px;
+      background:var(--primary);
+      color:white;
+      font-weight:bold;
+      font-size:15px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      opacity:0.9;
+    }
+
+    hr{
+      margin:25px 0;
+      border:none;
+      border-top:1px solid #e5e7eb;
+    }
+
+    @media(max-width:700px){
+      .grid{grid-template-columns:1fr;}
     }
   </style>
 </head>
 
 <body>
 
-  <h2>🚜 यांत्रिकी मातीकाम माहिती प्रणाली</h2>
+<h2>🚜 यांत्रिकी मातीकाम माहिती प्रणाली</h2>
 
-  <form id="mainForm">
+<form id="mainForm">
+
+  <!-- BASIC INFO -->
+  <div class="grid">
 
     <div class="section">
-      <label for="subdivision">🏢 उपविभाग निवडा</label>
-      <select id="subdivision" required>
-        <option value="">उपविभाग निवडा...</option>
-      </select>
+      <label>🏢 उपविभाग</label>
+      <select id="subdivision" required></select>
     </div>
 
     <div class="section">
-      <label for="workType">🎛 कामाचा प्रकार</label>
-      <select id="workType" required>
-        <option value="">कामाचा प्रकार निवडा...</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label for="projectName">🏗 प्रकल्पाचे नाव</label>
-      <select id="projectName" required>
-        <option value="">प्रकल्प निवडा...</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label for="machineType">⚙️ सयंत्राचा प्रकार</label>
-      <select id="machineType" required>
-        <option value="">सयंत्राचा प्रकार निवडा...</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label for="machineName">📋 मशीन</label>
-      <select id="machineName" required>
-        <option value="">मशीन निवडा...</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label for="staffName">👷 चालक / ऑपरेटर</label>
-      <select id="staffName" required>
-        <option value="">चालक / ऑपरेटर निवडा...</option>
-      </select>
-    </div>
-
-    <div class="section">
-      <label for="workDate">📅 दिनांक</label>
+      <label>📅 दिनांक</label>
       <input type="date" id="workDate" required>
     </div>
 
     <div class="section">
-      <label for="dieselQty">⛽ डिझेल (लिटर)</label>
+      <label>🎛 कामाचा प्रकार</label>
+      <select id="workType" required></select>
+    </div>
+
+    <div class="section">
+      <label>🏗 प्रकल्प</label>
+      <select id="projectName" required></select>
+    </div>
+
+    <div class="section">
+      <label>⚙️ सयंत्र प्रकार</label>
+      <select id="machineType" required></select>
+    </div>
+
+    <div class="section">
+      <label>📋 मशीन</label>
+      <select id="machineName" required></select>
+    </div>
+
+    <div class="section">
+      <label>👷 चालक / ऑपरेटर</label>
+      <select id="staffName" required></select>
+    </div>
+
+    <div class="section">
+      <label>⛽ डिझेल (लिटर)</label>
       <input type="number" id="dieselQty" min="0" step="0.1" required>
     </div>
 
-    <div class="section">
-      <label for="startReading">▶️ सुरुवातीचे Reading</label>
-     <input type="number" id="startReading" min="0" required>
+  </div>
+
+  <hr>
+
+  <!-- MACHINE SECTION -->
+  <div id="machineSection">
+
+    <div class="grid">
+
+      <div class="section">
+        <label>▶️ सुरुवातीचे Reading</label>
+        <input type="number" id="startReading" min="0" required>
+      </div>
+
+      <div class="section">
+        <label>⏹ शेवटचे Reading</label>
+        <input type="number" id="endReading" min="0" required>
+      </div>
+
+      <div class="section">
+        <label>📊 Dashboard एकूण</label>
+        <input type="number" id="totalHoursReading" readonly>
+      </div>
+
+      <div class="section">
+        <label>⛽ डिझेल वेळ</label>
+        <input type="time" id="dieselTime">
+      </div>
+
+      <div class="section">
+        <label>⛽ डिझेल Reading</label>
+        <input type="number" id="dieselReading">
+      </div>
+
+      <div class="section">
+        <label>⏱ शिफ्ट-१ सुरू</label>
+        <input type="time" id="shift1Start">
+      </div>
+
+      <div class="section">
+        <label>⏱ शिफ्ट-१ बंद</label>
+        <input type="time" id="shift1End">
+      </div>
+
+      <div class="section">
+        <label>⏱ शिफ्ट-२ सुरू</label>
+        <input type="time" id="shift2Start">
+      </div>
+
+      <div class="section">
+        <label>⏱ शिफ्ट-२ बंद</label>
+        <input type="time" id="shift2End">
+      </div>
+
+      <div class="section">
+        <label>🧮 एकूण तास (Shift)</label>
+        <input type="number" id="totalShiftHours" readonly>
+      </div>
+
     </div>
 
-    <div class="section">
-      <label for="endReading">⏹ शेवटचे Reading</label>
-      <input type="number" id="endReading" min="0" required>
+  </div>
+
+  <!-- VEHICLE SECTION -->
+  <div id="vehicleSection" style="display:none;">
+
+    <div class="grid">
+
+      <div class="section">
+        <label>📍 या ठिकाणापासून ते त्या ठिकाणापर्यंत</label>
+        <input type="text" id="locationFromTo">
+      </div>
+
+      <div class="section">
+        <label>🔁 एकूण ट्रिप्स</label>
+        <input type="number" id="tripCount" min="0">
+      </div>
+
     </div>
 
-    <button type="submit">✅ माहिती जतन करा</button>
+  </div>
 
-  </form>
+  <button type="submit">✅ माहिती जतन करा</button>
 
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+</form>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
