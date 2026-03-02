@@ -1,18 +1,24 @@
+// ===============================
+// INIT
+// ===============================
+
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadConfig();
-  populateSubdivisions();
+  try {
+    await loadConfig();
+    populateSubdivisions();
 
-  document
-    .getElementById("subdivision")
-    .addEventListener("change", handleSubdivisionChange);
+    // Auto set today's date
+    getEl("workDate").value =
+      new Date().toISOString().split("T")[0];
 
-  document
-    .getElementById("workType")
-    .addEventListener("change", handleWorkTypeChange);
+  } catch (err) {
+    console.error(err);
+    alert("⚠️ Configuration load करण्यात त्रुटी आली.");
+  }
 
-  document
-    .getElementById("machineType")
-    .addEventListener("change", handleMachineTypeChange);
+  getEl("subdivision").addEventListener("change", handleSubdivisionChange);
+  getEl("workType").addEventListener("change", handleWorkTypeChange);
+  getEl("machineType").addEventListener("change", handleMachineTypeChange);
 });
 
 // ===============================
@@ -20,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ===============================
 
 function populateSubdivisions() {
-  const select = document.getElementById("subdivision");
+  const select = getEl("subdivision");
   resetSelect(select, "उपविभाग निवडा...");
 
   CONFIG.subdivisions.forEach(sub => {
@@ -29,15 +35,14 @@ function populateSubdivisions() {
 }
 
 function handleSubdivisionChange() {
-  const subCode = document.getElementById("subdivision").value;
+  const subCode = getValue("subdivision");
 
-  resetSelect(document.getElementById("workType"), "कामाचा प्रकार निवडा...");
-  resetSelect(document.getElementById("projectName"), "प्रकल्प निवडा...");
+  resetSelect(getEl("workType"), "कामाचा प्रकार निवडा...");
+  resetSelect(getEl("projectName"), "प्रकल्प निवडा...");
   resetMachineSection();
 
   if (!subCode) return;
 
-  // Populate Work Types
   const workTypes = unique(
     CONFIG.projects
       .filter(p => p["Subdivision Code"] === subCode)
@@ -45,7 +50,7 @@ function handleSubdivisionChange() {
   );
 
   workTypes.forEach(type =>
-    addOption(document.getElementById("workType"), type, type)
+    addOption(getEl("workType"), type, type)
   );
 
   populateMachineTypes(subCode);
@@ -56,10 +61,10 @@ function handleSubdivisionChange() {
 // ===============================
 
 function handleWorkTypeChange() {
-  const subCode = document.getElementById("subdivision").value;
-  const workType = document.getElementById("workType").value;
+  const subCode = getValue("subdivision");
+  const workType = getValue("workType");
 
-  const projectSelect = document.getElementById("projectName");
+  const projectSelect = getEl("projectName");
   resetSelect(projectSelect, "प्रकल्प निवडा...");
 
   if (!subCode || !workType) return;
@@ -79,7 +84,7 @@ function handleWorkTypeChange() {
 // ===============================
 
 function populateMachineTypes(subCode) {
-  const machineTypeSelect = document.getElementById("machineType");
+  const machineTypeSelect = getEl("machineType");
   resetSelect(machineTypeSelect, "सयंत्राचा प्रकार निवडा...");
 
   const types = unique(
@@ -94,18 +99,17 @@ function populateMachineTypes(subCode) {
 }
 
 function handleMachineTypeChange() {
-  const subCode = document.getElementById("subdivision").value;
-  const machineType = document.getElementById("machineType").value;
+  const subCode = getValue("subdivision");
+  const machineType = getValue("machineType");
 
-  const machineSelect = document.getElementById("machineName");
-  const staffSelect = document.getElementById("staffName");
+  const machineSelect = getEl("machineName");
+  const staffSelect = getEl("staffName");
 
   resetSelect(machineSelect, "मशीन निवडा...");
   resetSelect(staffSelect, "चालक / ऑपरेटर निवडा...");
 
   if (!subCode || !machineType) return;
 
-  // Populate Machines
   const machines = CONFIG.machines.filter(m =>
     m["Subdivision Code"] === subCode &&
     m["Machine Type"] === machineType
@@ -115,16 +119,16 @@ function handleMachineTypeChange() {
     addOption(machineSelect, m["Machine Name"], m["Machine Name"])
   );
 
-  // Populate Staff
   populateStaff(subCode, machineType);
 }
 
 function populateStaff(subCode, machineType) {
-  const staffSelect = document.getElementById("staffName");
+  const staffSelect = getEl("staffName");
 
+  // *** As per your instruction — exact compare kept ***
   const roleRequired =
     machineType === "डोझर/एस्कॅव्हेटर"
-      ? "Operator"  
+      ? "Operator"
       : "Driver";
 
   const staff = CONFIG.staff.filter(s =>
@@ -138,14 +142,22 @@ function populateStaff(subCode, machineType) {
 }
 
 function resetMachineSection() {
-  resetSelect(document.getElementById("machineType"), "सयंत्राचा प्रकार निवडा...");
-  resetSelect(document.getElementById("machineName"), "मशीन निवडा...");
-  resetSelect(document.getElementById("staffName"), "चालक / ऑपरेटर निवडा...");
+  resetSelect(getEl("machineType"), "सयंत्राचा प्रकार निवडा...");
+  resetSelect(getEl("machineName"), "मशीन निवडा...");
+  resetSelect(getEl("staffName"), "चालक / ऑपरेटर निवडा...");
 }
 
 // ===============================
 // CLEAN UTILITY FUNCTIONS
 // ===============================
+
+function getEl(id) {
+  return document.getElementById(id);
+}
+
+function getValue(id) {
+  return getEl(id).value;
+}
 
 function resetSelect(selectElement, placeholder) {
   selectElement.innerHTML = "";
