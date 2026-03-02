@@ -296,7 +296,7 @@ async function handleSubmit(e) {
   if (end < start) {
     alert("❌ शेवटचे reading सुरुवातीपेक्षा कमी असू शकत नाही.");
     btn.disabled = false;
-    btn.textContent = "✅ माहिती जतन करा";
+btn.innerHTML = "✅ माहिती जतन करा";
     return;
   }
 
@@ -315,7 +315,7 @@ if (getEl("vehicleSection")?.style.display === "block") {
   if (!getValue("tripCount") || !getValue("locationFromTo")) {
     alert("❌ वाहनासाठी ट्रिप्स व स्थान माहिती आवश्यक आहे.");
     btn.disabled = false;
-    btn.textContent = "✅ माहिती जतन करा";
+btn.innerHTML = "✅ माहिती जतन करा";
     return;
   }
 }
@@ -377,7 +377,7 @@ if (getEl("vehicleSection")?.style.display === "block") {
   }
 
   btn.disabled = false;
-  btn.textContent = "✅ माहिती जतन करा";
+btn.innerHTML = "✅ माहिती जतन करा";
 }
 
 // ===============================
