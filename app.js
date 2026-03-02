@@ -370,7 +370,7 @@ btn.innerHTML = "✅ माहिती जतन करा";
 
     const result = await res.json();
 
-    if (result.result === "success") {
+    if (result.result === "success" || result.status === "success" || result.success === true) {
       alert("✅ माहिती यशस्वीरित्या जतन झाली!");
       getEl("mainForm").reset();
       resetMachineSection();
