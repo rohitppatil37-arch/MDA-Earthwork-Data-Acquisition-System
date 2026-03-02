@@ -124,7 +124,7 @@ function populateStaff(subCode, machineType) {
 
   const roleRequired =
     machineType === "डोझर/एस्कॅव्हेटर"
-      ? "Opertor"   // Sheet spelling exactly same
+      ? "Operator"  
       : "Driver";
 
   const staff = CONFIG.staff.filter(s =>
