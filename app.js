@@ -131,21 +131,9 @@ function handleMachineTypeChange() {
 
   populateStaff(subCode, machineType);
 
-  toggleFormFields(machineType);   // 👈 ADD THIS
+  toggleFormFields(machineType);   // Dynamic show/hide
 }
 
-  // Vehicle types → Trips compulsory
-  if (
-    machineType === "टिपर" ||
-    machineType === "ट्रान्सपोर्टर" ||
-    machineType === "युटिलिटी वाहने"
-  ) {
-    getEl("tripCount").required = true;
-  } else {
-    getEl("tripCount").required = false;
-    getEl("tripCount").value = "";
-  }
-}
 function toggleFormFields(machineType) {
 
   const machineSection = getEl("machineSection");
@@ -157,18 +145,19 @@ function toggleFormFields(machineType) {
     machineType === "युटिलिटी वाहने";
 
   if (isVehicle) {
-    // Show vehicle fields
+    // 🚛 VEHICLE MODE
     vehicleSection.style.display = "block";
     machineSection.style.display = "none";
 
     getEl("tripCount").required = true;
     getEl("locationFromTo").required = true;
 
+    // Machine fields reset
     getEl("dieselTime").required = false;
     getEl("dieselReading").required = false;
 
   } else {
-    // Show machine fields
+    // ⚙️ MACHINE MODE
     vehicleSection.style.display = "none";
     machineSection.style.display = "block";
 
@@ -179,6 +168,7 @@ function toggleFormFields(machineType) {
     getEl("locationFromTo").value = "";
   }
 }
+
 function populateStaff(subCode, machineType) {
   const roleRequired =
     machineType === "डोझर/एस्कॅव्हेटर"
@@ -199,6 +189,10 @@ function resetMachineSection() {
   resetSelect(getEl("machineType"), "सयंत्राचा प्रकार निवडा...");
   resetSelect(getEl("machineName"), "मशीन निवडा...");
   resetSelect(getEl("staffName"), "चालक / ऑपरेटर निवडा...");
+
+  // Reset dynamic sections
+  if (getEl("machineSection")) getEl("machineSection").style.display = "block";
+  if (getEl("vehicleSection")) getEl("vehicleSection").style.display = "none";
 }
 
 // ===============================
