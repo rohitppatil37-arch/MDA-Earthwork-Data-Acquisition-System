@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadConfig();
     populateSubdivisions();
 
-    // Auto set today's date
     getEl("workDate").value =
       new Date().toISOString().split("T")[0];
 
@@ -19,6 +18,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   getEl("subdivision").addEventListener("change", handleSubdivisionChange);
   getEl("workType").addEventListener("change", handleWorkTypeChange);
   getEl("machineType").addEventListener("change", handleMachineTypeChange);
+
+  // Auto calculations
+  getEl("startReading").addEventListener("input", calculateTotalReading);
+  getEl("endReading").addEventListener("input", calculateTotalReading);
+
+  getEl("shift1Start").addEventListener("input", calculateShiftHours);
+  getEl("shift1End").addEventListener("input", calculateShiftHours);
+  getEl("shift2Start").addEventListener("input", calculateShiftHours);
+  getEl("shift2End").addEventListener("input", calculateShiftHours);
+
+  getEl("dieselQty").addEventListener("input", handleDieselLogic);
 });
 
 // ===============================
@@ -120,12 +130,21 @@ function handleMachineTypeChange() {
   );
 
   populateStaff(subCode, machineType);
+
+  // Vehicle types → Trips compulsory
+  if (
+    machineType === "टिपर" ||
+    machineType === "ट्रान्सपोर्टर" ||
+    machineType === "युटिलिटी वाहने"
+  ) {
+    getEl("tripCount").required = true;
+  } else {
+    getEl("tripCount").required = false;
+    getEl("tripCount").value = "";
+  }
 }
 
 function populateStaff(subCode, machineType) {
-  const staffSelect = getEl("staffName");
-
-  // *** As per your instruction — exact compare kept ***
   const roleRequired =
     machineType === "डोझर/एस्कॅव्हेटर"
       ? "Operator"
@@ -137,7 +156,7 @@ function populateStaff(subCode, machineType) {
   );
 
   staff.forEach(person =>
-    addOption(staffSelect, person["Name"], person["Name"])
+    addOption(getEl("staffName"), person["Name"], person["Name"])
   );
 }
 
@@ -148,16 +167,124 @@ function resetMachineSection() {
 }
 
 // ===============================
-// CLEAN UTILITY FUNCTIONS
+// CALCULATIONS
 // ===============================
 
-function getEl(id) {
-  return document.getElementById(id);
+function calculateTotalReading() {
+  const start = Number(getValue("startReading")) || 0;
+  const end = Number(getValue("endReading")) || 0;
+
+  if (end >= start) {
+    getEl("totalReading").value = (end - start).toFixed(1);
+  }
 }
 
-function getValue(id) {
-  return getEl(id).value;
+function calculateShiftHours() {
+  function toHours(t) {
+    if (!t) return 0;
+    const [h, m] = t.split(":").map(Number);
+    return h + m / 60;
+  }
+
+  const s1 = toHours(getValue("shift1Start"));
+  const e1 = toHours(getValue("shift1End"));
+  const s2 = toHours(getValue("shift2Start"));
+  const e2 = toHours(getValue("shift2End"));
+
+  let total = 0;
+  if (e1 > s1) total += e1 - s1;
+  if (e2 > s2) total += e2 - s2;
+
+  getEl("totalShiftHours").value = total.toFixed(1);
 }
+
+function handleDieselLogic() {
+  const qty = Number(getValue("dieselQty"));
+  const time = getEl("dieselTime");
+  const reading = getEl("dieselReading");
+
+  if (qty > 0) {
+    time.disabled = false;
+    reading.disabled = false;
+  } else {
+    time.value = "";
+    reading.value = "";
+    time.disabled = true;
+    reading.disabled = true;
+  }
+}
+
+// ===============================
+// FORM SUBMIT
+// ===============================
+
+getEl("mainForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const start = Number(getValue("startReading")) || 0;
+  const end = Number(getValue("endReading")) || 0;
+  const total = end >= start ? end - start : 0;
+
+  let remark = "✅ काम झाले";
+  if (!total && !getValue("dieselQty")) {
+    remark = "🚫 काम झाले नाही";
+  } else if (getValue("dieselQty") == 0) {
+    remark = "⚠️ काम झाले पण डिझेल भरले नाही";
+  }
+
+  const payload = {
+    "दिनांक": getValue("workDate"),
+    "कामाचा प्रकार": getValue("workType"),
+    "प्रकल्पाचे नाव": getValue("projectName"),
+    "सयंत्राचा प्रकार": getValue("machineType"),
+    "चालक": getValue("staffName"),
+    "मशीन": getValue("machineName"),
+    "डिझेल (लिटर)": getValue("dieselQty"),
+    "डिझेल वेळ": getValue("dieselTime"),
+    "डिझेल reading": getValue("dieselReading"),
+    "सुरुवातीचे reading": start,
+    "शेवटचे reading": end,
+    "Dashboard एकूण (तास/km)": total,
+    "या ठिकाणापासून ते त्या ठिकाणापर्यंत": getValue("locationFromTo"),
+    "एकूण ट्रिप्स": getValue("tripCount"),
+    "शिफ्ट-१ सुरू वेळ": getValue("shift1Start"),
+    "शिफ्ट-१ बंद वेळ": getValue("shift1End"),
+    "शिफ्ट-२ सुरू वेळ": getValue("shift2Start"),
+    "शिफ्ट-२ बंद वेळ": getValue("shift2End"),
+    "एकूण तास (shift)": getValue("totalShiftHours"),
+    "टीप": remark
+  };
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "text/plain;charset=utf-8" }
+    });
+
+    const result = await res.json();
+
+    if (result.result === "success") {
+      alert("✅ माहिती यशस्वीरित्या जतन झाली!");
+      getEl("mainForm").reset();
+      getEl("workDate").value =
+        new Date().toISOString().split("T")[0];
+    } else {
+      alert("⚠️ Server error आला.");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ नेटवर्क एरर. पुन्हा प्रयत्न करा.");
+  }
+});
+
+// ===============================
+// UTILITIES
+// ===============================
+
+function getEl(id) { return document.getElementById(id); }
+function getValue(id) { return getEl(id)?.value || ""; }
 
 function resetSelect(selectElement, placeholder) {
   selectElement.innerHTML = "";
