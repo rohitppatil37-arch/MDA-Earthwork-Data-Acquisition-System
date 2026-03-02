@@ -131,6 +131,9 @@ function handleMachineTypeChange() {
 
   populateStaff(subCode, machineType);
 
+  toggleFormFields(machineType);   // 👈 ADD THIS
+}
+
   // Vehicle types → Trips compulsory
   if (
     machineType === "टिपर" ||
@@ -143,7 +146,39 @@ function handleMachineTypeChange() {
     getEl("tripCount").value = "";
   }
 }
+function toggleFormFields(machineType) {
 
+  const machineSection = getEl("machineSection");
+  const vehicleSection = getEl("vehicleSection");
+
+  const isVehicle =
+    machineType === "टिपर" ||
+    machineType === "ट्रान्सपोर्टर" ||
+    machineType === "युटिलिटी वाहने";
+
+  if (isVehicle) {
+    // Show vehicle fields
+    vehicleSection.style.display = "block";
+    machineSection.style.display = "none";
+
+    getEl("tripCount").required = true;
+    getEl("locationFromTo").required = true;
+
+    getEl("dieselTime").required = false;
+    getEl("dieselReading").required = false;
+
+  } else {
+    // Show machine fields
+    vehicleSection.style.display = "none";
+    machineSection.style.display = "block";
+
+    getEl("tripCount").required = false;
+    getEl("locationFromTo").required = false;
+
+    getEl("tripCount").value = "";
+    getEl("locationFromTo").value = "";
+  }
+}
 function populateStaff(subCode, machineType) {
   const roleRequired =
     machineType === "डोझर/एस्कॅव्हेटर"
