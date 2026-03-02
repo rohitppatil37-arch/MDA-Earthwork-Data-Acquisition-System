@@ -21,6 +21,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   getEl("workType")?.addEventListener("change", handleWorkTypeChange);
   getEl("machineType")?.addEventListener("change", handleMachineTypeChange);
 
+  // ✅ IMPORTANT — move inside
+  getEl("machineName")?.addEventListener("change", () => {
+    const subCode = getValue("subdivision");
+    const machineType = getValue("machineType");
+    toggleFormFields(machineType, subCode);
+  });
+
   getEl("startReading")?.addEventListener("input", calculateTotalReading);
   getEl("endReading")?.addEventListener("input", calculateTotalReading);
 
@@ -32,11 +39,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   getEl("dieselQty")?.addEventListener("input", handleDieselLogic);
 
   getEl("mainForm")?.addEventListener("submit", handleSubmit);
-});
-getEl("machineName")?.addEventListener("change", () => {
-  const subCode = getValue("subdivision");
-  const machineType = getValue("machineType");
-  toggleFormFields(machineType, subCode);
 });
 // ===============================
 // SUBDIVISION
