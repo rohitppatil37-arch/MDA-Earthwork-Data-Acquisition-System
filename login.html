@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Subdivision Login | यांत्रिकी मातीकाम माहिती प्रणाली</title>
+<title>Admin Login | यांत्रिकी मातीकाम माहिती प्रणाली</title>
 
 <style>
-
 :root{
   --primary:#1e40af;
   --bg:#f3f4f6;
@@ -24,7 +23,7 @@ body{
   padding:15px 20px 40px;
 }
 
-/* HEADER SAME AS FORM */
+/* HEADER */
 
 .gov-header{
   text-align:center;
@@ -108,6 +107,11 @@ button{
   transition:0.2s;
 }
 
+button:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
 button:hover{
   opacity:0.9;
 }
@@ -124,16 +128,12 @@ button:hover{
   .side-logo{ width:65px; }
   .gov-title{ font-size:20px; }
 }
-
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-
 <div class="gov-header">
-
   <div class="gov-logos">
     <img src="left-logo.png" class="side-logo">
     <img src="main-logo.png" class="center-logo">
@@ -147,22 +147,19 @@ button:hover{
   <div class="gov-title">
     यांत्रिकी मातीकाम माहिती प्रणाली
   </div>
-
 </div>
-
-<!-- LOGIN CARD -->
 
 <div class="container">
 
-<h3>🔐 Subdivision Login</h3>
+<h3>🔐 Admin Login</h3>
 
 <label>Username</label>
-<input type="text" id="username" placeholder="Username">
+<input type="text" id="username" placeholder="Username" autocomplete="off">
 
 <label>Password</label>
-<input type="password" id="password" placeholder="Password">
+<input type="password" id="password" placeholder="Password" autocomplete="off">
 
-<button onclick="login()">Login</button>
+<button id="loginBtn" onclick="login()">Login</button>
 
 <div id="errorMsg" class="error"></div>
 
@@ -172,28 +169,64 @@ button:hover{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzOhvYrDFrXe6vo7hjeMkuFH0GJ2exdLNfzy9ZyPASiCu-JcmXY7yHTxixNq29tACB5Jg/exec";
 
+/* 🔐 Auto Redirect if Already Logged In */
+if(localStorage.getItem("token")){
+  window.location.href = "admin-dashboard.html";
+}
+
+/* 🔑 Enter Key Support */
+document.addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    login();
+  }
+});
+
 async function login(){
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const btn = document.getElementById("loginBtn");
+  const errorBox = document.getElementById("errorMsg");
 
-  const res = await fetch(API_URL + "?mode=login", {
-    method: "POST",
-    body: JSON.stringify({ username, password })
-  });
+  errorBox.innerText = "";
+  btn.disabled = true;
 
-  const data = await res.json();
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  if(data.error){
-    document.getElementById("errorMsg").innerText = "❌ चुकीचे Username किंवा Password";
+  /* Validation */
+  if(!username || !password){
+    errorBox.innerText = "⚠️ Username आणि Password भरा";
+    btn.disabled = false;
     return;
   }
 
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("subdivision", data.subdivision);
-  localStorage.setItem("role", data.role);
+  try {
 
-  window.location.href = "dashboard.html";
+    const res = await fetch(API_URL + "?mode=login", {
+      method: "POST",
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+
+    if(data.error){
+      errorBox.innerText = "❌ चुकीचे Username किंवा Password";
+      btn.disabled = false;
+      return;
+    }
+
+    /* Save Session */
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("subdivision", data.subdivision);
+    localStorage.setItem("role", data.role);
+
+    /* Redirect */
+    window.location.href = "admin-dashboard.html";
+
+  } catch(err){
+
+    errorBox.innerText = "⚠️ Server शी संपर्क होऊ शकला नाही";
+    btn.disabled = false;
+  }
 }
 
 </script>
