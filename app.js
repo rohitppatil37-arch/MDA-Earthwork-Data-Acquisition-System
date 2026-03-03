@@ -39,7 +39,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   getEl("dieselQty")?.addEventListener("input", handleDieselLogic);
 
   getEl("mainForm")?.addEventListener("submit", handleSubmit);
+    // 🔥 Premium Live Error Clear (Improved)
+document.querySelectorAll("input, select").forEach(el => {
+
+  const clearError = () => {
+    el.classList.remove("error");
+
+    // If no more errors left, hide box
+    if (document.querySelectorAll(".error").length === 0) {
+      closeErrorBox();
+    }
+  };
+
+  el.addEventListener("input", clearError);
+  el.addEventListener("change", clearError);
+
 });
+  });
 // ===============================
 // SUBDIVISION
 // ===============================
@@ -354,7 +370,7 @@ async function handleSubmit(e) {
 
     if (text && text.toLowerCase().includes("success")) {
 
-      alert("✅ माहिती यशस्वीरित्या जतन झाली!");
+      showSuccessMessage("माहिती यशस्वीरित्या जतन झाली!");
       getEl("mainForm").reset();
       resetMachineSection();
       getEl("workDate").value =
@@ -378,7 +394,22 @@ async function handleSubmit(e) {
 // ===============================
 // UTILITIES
 // ===============================
+function showSuccessMessage(message) {
+  const box = document.createElement("div");
+  box.className = "success-toast";
+  box.innerText = message;
 
+  document.body.appendChild(box);
+
+  setTimeout(() => {
+    box.classList.add("show");
+  }, 10);
+
+  setTimeout(() => {
+    box.classList.remove("show");
+    setTimeout(() => box.remove(), 300);
+  }, 3000);
+}
 function getEl(id) { return document.getElementById(id); }
 function getValue(id) { return getEl(id)?.value || ""; }
 
@@ -399,84 +430,128 @@ function addOption(selectElement, value, text) {
 function unique(arr) {
   return [...new Set(arr)];
 }
+function showErrorBox(fields) {
+
+  const list = document.getElementById("errorList");
+  const box = document.getElementById("errorBox");
+
+  list.innerHTML = "";
+
+  fields.forEach(field => {
+    const li = document.createElement("li");
+    li.textContent = field.label;
+    list.appendChild(li);
+
+    if (field.id) {
+      getEl(field.id)?.classList.add("error");
+    }
+  });
+
+  box.classList.remove("hidden");
+
+  // Scroll to first error field
+  if (fields[0]?.id) {
+    getEl(fields[0].id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function closeErrorBox() {
+  document.getElementById("errorBox").classList.add("hidden");
+
+  // Remove red highlight
+  document.querySelectorAll(".error").forEach(el =>
+    el.classList.remove("error")
+  );
+}
 function validateFrontend() {
+// Clear old errors
+document.querySelectorAll(".error").forEach(el =>
+  el.classList.remove("error")
+);
+  const fieldLabels = {
+    subdivision: "उपविभाग",
+    workType: "कामाचा प्रकार",
+    projectName: "प्रकल्पाचे नाव",
+    machineType: "सयंत्राचा प्रकार",
+    machineName: "मशीन",
+    staffName: "चालक / ऑपरेटर",
+    startReading: "सुरुवातीचे reading",
+    endReading: "शेवटचे reading",
+    dieselQty: "डिझेल प्रमाण",
+    shift1Start: "शिफ्ट-१ सुरू वेळ",
+    shift1End: "शिफ्ट-१ बंद वेळ"
+  };
 
-  const requiredFields = [
-  "subdivision",
-  "workType",
-  "projectName",
-  "machineType",
-  "machineName",
-  "staffName",
-  "startReading",
-  "endReading",
-  "dieselQty",
-  "shift1Start",
-  "shift1End"
-];
+  let missing = [];
 
-  for (let id of requiredFields) {
+  // Basic Required Check
+  for (let id in fieldLabels) {
     if (!getValue(id).trim()) {
-      alert("❌ कृपया सर्व आवश्यक माहिती भरा.");
-      getEl(id)?.focus();
-      return false;
+      missing.push({ id, label: fieldLabels[id] });
     }
   }
 
-  // Reading validation
-const start = Number(getValue("startReading"));
-const end = Number(getValue("endReading"));
+  // Vehicle Validation
+  const vehicleSection = getEl("vehicleSection");
+  if (vehicleSection && vehicleSection.offsetParent !== null) {
+    if (!getValue("tripCount").trim())
+      missing.push({ id: "tripCount", label: "एकूण ट्रिप्स" });
 
-if (isNaN(start) || isNaN(end)) {
-  alert("❌ Reading वैध संख्या असावी.");
-  return false;
-}
+    if (!getValue("locationFromTo").trim())
+      missing.push({ id: "locationFromTo", label: "स्थान माहिती" });
+  }
 
-if (end <= start) {
-  alert("❌ शेवटचे reading सुरुवातीपेक्षा मोठे असावे.");
-  return false;
-}
+  // Diesel Extra Validation
+  const dieselRaw = getValue("dieselQty").trim();
+  const diesel = Number(dieselRaw);
 
-// Shift validation
-function timeToMinutes(t) {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
+  if (dieselRaw !== "" && (isNaN(diesel) || diesel < 0)) {
+    missing.push({ id: "dieselQty", label: "डिझेल प्रमाण वैध संख्या असावी" });
+  }
 
-const shiftStart = getValue("shift1Start");
-const shiftEnd = getValue("shift1End");
+  if (diesel > 0) {
+    if (!getValue("dieselTime").trim())
+      missing.push({ id: "dieselTime", label: "डिझेल वेळ" });
 
-if (timeToMinutes(shiftEnd) <= timeToMinutes(shiftStart)) {
-  alert("❌ शिफ्ट-१ बंद वेळ सुरू वेळेपेक्षा मोठी असावी.");
-  return false;
-}
+    if (!getValue("dieselReading").trim())
+      missing.push({ id: "dieselReading", label: "डिझेल reading" });
+  }
 
-// Diesel validation
-const dieselRaw = getValue("dieselQty").trim();
-
-if (dieselRaw === "") {
-  alert("❌ डिझेल प्रमाण भरणे आवश्यक आहे.");
-  return false;
-}
-
-const diesel = Number(dieselRaw);
-
-if (isNaN(diesel) || diesel < 0) {
-  alert("❌ डिझेल प्रमाण वैध संख्या असावी.");
-  return false;
-}
-
-if (diesel > 0) {
-  if (!getValue("dieselTime").trim()) {
-    alert("❌ डिझेल वेळ आवश्यक आहे.");
+  if (missing.length > 0) {
+    showErrorBox(missing);
     return false;
   }
 
-  if (!getValue("dieselReading").trim()) {
-    alert("❌ डिझेल reading आवश्यक आहे.");
+  // Reading Logical Validation
+  const start = Number(getValue("startReading"));
+  const end = Number(getValue("endReading"));
+
+  if (isNaN(start) || isNaN(end) || end <= start) {
+    showErrorBox([
+      { id: "endReading", label: "शेवटचे reading सुरुवातीपेक्षा मोठे असावे" }
+    ]);
+    return false;
+  }
+
+  // Shift Time Validation
+  function timeToMinutes(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  const shiftStart = getValue("shift1Start");
+  const shiftEnd = getValue("shift1End");
+
+  if (shiftStart && shiftEnd) {
+  if (timeToMinutes(shiftEnd) <= timeToMinutes(shiftStart)) {
+    showErrorBox([
+      { id: "shift1End", label: "शिफ्ट-१ बंद वेळ सुरू वेळेपेक्षा मोठी असावी" }
+    ]);
     return false;
   }
 }
 
-  return true;
-}
+// ✅ If everything valid
+closeErrorBox();
+return true;
+ 
