@@ -13,6 +13,7 @@
   --border:#e5e7eb;
   --danger:#b91c1c;
   --success:#059669;
+  --secondary:#6b7280;
 }
 
 body{
@@ -51,7 +52,7 @@ body{
   color:var(--primary);
 }
 
-/* DASHBOARD CARD */
+/* CARD */
 
 .container{
   max-width:750px;
@@ -66,8 +67,15 @@ body{
   font-size:20px;
   font-weight:700;
   color:var(--success);
-  margin-bottom:20px;
+  margin-bottom:8px;
   text-align:center;
+}
+
+.role-text{
+  text-align:center;
+  font-size:14px;
+  color:var(--secondary);
+  margin-bottom:20px;
 }
 
 .report-section{
@@ -84,11 +92,22 @@ button{
   margin-top:10px;
   background:var(--primary);
   color:white;
+  transition:0.2s;
+}
+
+button:hover{
+  opacity:0.9;
 }
 
 button.logout{
   background:var(--danger);
   margin-top:25px;
+}
+
+.loading{
+  text-align:center;
+  font-size:14px;
+  color:var(--secondary);
 }
 
 </style>
@@ -108,9 +127,8 @@ button.logout{
 
 <div class="container">
 
-  <div class="subdivision-name" id="subdivisionName">
-    Loading...
-  </div>
+  <div class="subdivision-name" id="subdivisionName"></div>
+  <div class="role-text" id="roleText"></div>
 
   <div class="report-section">
     <h3>📥 Reports Download</h3>
@@ -128,6 +146,8 @@ button.logout{
     🚪 Logout
   </button>
 
+  <div class="loading" id="loadingText"></div>
+
 </div>
 
 <script>
@@ -135,21 +155,26 @@ button.logout{
 const API_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
 
 /* ============================= */
-/* PAGE SECURITY CHECK */
+/* SECURITY + PAGE LOAD */
 /* ============================= */
 
 document.addEventListener("DOMContentLoaded", function(){
 
   const token = localStorage.getItem("token");
-  const subdivision = localStorage.getItem("subdivision");
+  const subdivisionName = localStorage.getItem("subdivisionName");
+  const subdivisionCode = localStorage.getItem("subdivisionCode");
+  const role = localStorage.getItem("role");
 
-  if(!token || !subdivision){
+  if(!token || !subdivisionCode || !subdivisionName){
     window.location.href = "login.html";
     return;
   }
 
   document.getElementById("subdivisionName").innerText =
-    "📍 उपविभाग: " + subdivision;
+    " उपविभाग: " + subdivisionName;
+
+  document.getElementById("roleText").innerText =
+    "भूमिका: " + role;
 
 });
 
@@ -160,12 +185,18 @@ document.addEventListener("DOMContentLoaded", function(){
 function downloadFullReport(){
 
   const token = localStorage.getItem("token");
-  const subdivision = localStorage.getItem("subdivision");
+  const subdivisionCode = localStorage.getItem("subdivisionCode");
+
+  document.getElementById("loadingText").innerText = "⏳ अहवाल तयार होत आहे...";
 
   window.open(
-    API_URL + "?mode=dashboard&subdivision=" + subdivision + "&token=" + token,
+    API_URL + "?mode=dashboard&subdivision=" + subdivisionCode + "&token=" + token,
     "_blank"
   );
+
+  setTimeout(()=>{
+    document.getElementById("loadingText").innerText = "";
+  },2000);
 }
 
 function downloadTodayReport(){
@@ -178,11 +209,15 @@ function downloadTodayReport(){
 
 function logout(){
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("subdivision");
-  localStorage.removeItem("role");
+  if(confirm("तुम्हाला लॉगआउट करायचे आहे का?")){
 
-  window.location.href = "login.html";
+    localStorage.removeItem("token");
+    localStorage.removeItem("subdivisionCode");
+    localStorage.removeItem("subdivisionName");
+    localStorage.removeItem("role");
+
+    window.location.href = "login.html";
+  }
 }
 
 </script>
