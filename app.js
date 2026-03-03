@@ -566,4 +566,4 @@ if (shift2Start && shift2End) {
 // ✅ If everything valid
 closeErrorBox();
 return true;
- 
+}
