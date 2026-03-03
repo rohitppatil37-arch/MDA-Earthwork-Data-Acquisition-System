@@ -550,7 +550,14 @@ document.querySelectorAll(".error").forEach(el =>
     return false;
   }
 }
-
+if (shift2Start && shift2End) {
+  if (timeToMinutes(shift2End) <= timeToMinutes(shift2Start)) {
+    showErrorBox([
+      { id: "shift2End", label: "शिफ्ट-२ बंद वेळ सुरू वेळेपेक्षा मोठी असावी" }
+    ]);
+    return false;
+  }
+}
 // ✅ If everything valid
 closeErrorBox();
 return true;
