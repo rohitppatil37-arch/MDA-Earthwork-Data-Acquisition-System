@@ -38,11 +38,12 @@ async function initApp() {
 
 }
 
+  function attachEventListeners() {
+
   getEl("subdivision")?.addEventListener("change", handleSubdivisionChange);
   getEl("workType")?.addEventListener("change", handleWorkTypeChange);
   getEl("machineType")?.addEventListener("change", handleMachineTypeChange);
 
-  // ✅ IMPORTANT — move inside
   getEl("machineName")?.addEventListener("change", () => {
     const subCode = getValue("subdivision");
     const machineType = getValue("machineType");
@@ -58,25 +59,23 @@ async function initApp() {
   getEl("shift2End")?.addEventListener("input", calculateShiftHours);
 
   getEl("dieselQty")?.addEventListener("input", handleDieselLogic);
-
   getEl("mainForm")?.addEventListener("submit", handleSubmit);
-    // 🔥 Premium Live Error Clear (Improved)
-document.querySelectorAll("input, select").forEach(el => {
 
-  const clearError = () => {
-    el.classList.remove("error");
+  document.querySelectorAll("input, select").forEach(el => {
 
-    // If no more errors left, hide box
-    if (document.querySelectorAll(".error").length === 0) {
-      closeErrorBox();
-    }
-  };
+    const clearError = () => {
+      el.classList.remove("error");
+      if (document.querySelectorAll(".error").length === 0) {
+        closeErrorBox();
+      }
+    };
 
-  el.addEventListener("input", clearError);
-  el.addEventListener("change", clearError);
+    el.addEventListener("input", clearError);
+    el.addEventListener("change", clearError);
 
-});
   });
+
+}  
 // ===============================
 // SUBDIVISION
 // ===============================
