@@ -40,7 +40,14 @@ h2{
   color:var(--primary);
   margin-bottom:5px;
 }
-
+ h3{
+  border-bottom:2px solid var(--border);
+  padding-bottom:6px;
+}
+  button:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}
 .subtitle{
   text-align:center;
   color:var(--danger);
@@ -103,18 +110,90 @@ button{
 @media(max-width:600px){
   .container{padding:18px;}
 }
+/* ERROR BOX */
+.error-box{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
 
+.error-content{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:400px;
+}
+
+.error-content h4{
+  margin-top:0;
+  color:var(--danger);
+}
+
+.error-content ul{
+  padding-left:18px;
+}
+
+.error-content button{
+  background:var(--primary);
+  color:white;
+  margin-top:10px;
+}
+
+.hidden{
+  display:none;
+}
+
+/* Error Highlight */
+.error{
+  border:2px solid var(--danger) !important;
+}
+
+/* Success Toast */
+.success-toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:var(--success);
+  color:white;
+  padding:12px 18px;
+  border-radius:8px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:0.3s;
+}
+
+.success-toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
 </style>
 </head>
 
 <body>
 
+<!-- ERROR BOX -->
+<div id="errorBox" class="error-box hidden">
+  <div class="error-content">
+    <h4>⚠️ खालील माहिती भरणे आवश्यक आहे:</h4>
+    <ul id="errorList"></ul>
+    <button type="button" onclick="closeErrorBox()">ठीक आहे</button>
+  </div>
+</div>
+
 <div class="container">
 
-<h2>🚜 यांत्रिकी उपविभाग क्र १, अलोरे</h2>
+<h2>यांत्रिकी मातीकाम माहिती प्रणाली</h2>
 <div class="subtitle">सर्व माहिती मराठीत नीट पणे भरावी</div>
 
-<form id="mainForm">
+<form id="mainForm" novalidate>
 
 <!-- DATE -->
 <div class="section">
@@ -188,15 +267,16 @@ button{
 
 <!-- MACHINE COMMON SECTION -->
 <div id="machineSection">
+<h3 style="color:var(--primary);margin-top:20px;">🔧 मशीन तपशील</h3>
 
 <div class="section">
 <label>▶️ काम सुरू करतानाचे डॅशबोर्ड रिडींग</label>
-<input type="number" id="startReading" min="0">
+<input type="number" id="startReading" min="0" required>
 </div>
 
 <div class="section">
 <label>⏹ काम थांबवतानाचे डॅशबोर्ड रिडींग</label>
-<input type="number" id="endReading" min="0">
+<input type="number" id="endReading" min="0" required>
 </div>
 
 <div class="section">
@@ -206,22 +286,22 @@ button{
 
 <div class="section">
 <label>🌅 पहिली शिफ्ट सुरू करताना ची वेळ</label>
-<input type="time" id="shift1Start">
+<input type="time" id="shift1Start" required>
 </div>
 
 <div class="section">
 <label>🌇 पहिली शिफ्ट थांबवितानाची वेळ</label>
-<input type="time" id="shift1End">
+<input type="time" id="shift1End" required>
 </div>
 
 <div class="section">
 <label>🌙 दुसरी शिफ्ट सुरू करताना ची वेळ</label>
-<input type="time" id="shift2Start">
+<input type="time" id="shift2Start" required>
 </div>
 
 <div class="section">
 <label>🌌 दुसरी शिफ्ट थांबवितानाची वेळ</label>
-<input type="time" id="shift2End">
+<input type="time" id="shift2End" required>
 </div>
 
 <div class="section">
@@ -233,6 +313,7 @@ button{
 
 <!-- VEHICLE EXTRA SECTION -->
 <div id="vehicleSection" style="display:none;">
+<h3 style="color:var(--primary);margin-top:20px;">🚚 वाहन तपशील</h3>
 
 <div class="section">
 <label>🔁 एकूण ट्रिप्स</label>
@@ -248,7 +329,7 @@ button{
 
 <button type="submit" class="btn-primary">✅ सबमिट करा</button>
 <button type="reset" class="btn-secondary">♻️ रीसेट</button>
-<button type="button" class="btn-success">📊 Dashboard पाहा</button>
+<button type="button" id="dashboardBtn" class="btn-success">📊 Dashboard पाहा</button>
 
 <div class="warning">
 ⚠️ सर्व माहिती भरून 'सबमिट करा' दाबा.
