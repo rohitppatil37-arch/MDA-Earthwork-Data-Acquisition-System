@@ -2,9 +2,24 @@
 // INIT
 // ===============================
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+async function initApp() {
+
   try {
+
+    console.log("🚀 App Starting...");
+
     await loadConfig();
+
+    console.log("📦 Loaded CONFIG:", CONFIG);
+
+    if (!CONFIG.subdivisions) {
+      throw new Error("Config missing subdivisions");
+    }
+
     populateSubdivisions();
 
     getEl("workDate").value =
@@ -12,10 +27,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     handleDieselLogic();
 
+    attachEventListeners();
+
   } catch (err) {
-    console.error(err);
+
+    console.error("❌ INIT FAILED:", err);
     alert("⚠️ Configuration load करण्यात त्रुटी आली.");
+
   }
+
+}
 
   getEl("subdivision")?.addEventListener("change", handleSubdivisionChange);
   getEl("workType")?.addEventListener("change", handleWorkTypeChange);
