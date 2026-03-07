@@ -14,7 +14,6 @@
   --card:#ffffff;
   --border:#e5e7eb;
   --danger:#b91c1c;
-  --success:#059669;
 }
 
 *{box-sizing:border-box;}
@@ -26,7 +25,7 @@ body{
   padding:15px 20px 40px;
 }
 
-/* ================= HEADER ================= */
+/* HEADER */
 
 .gov-header{
   text-align:center;
@@ -61,10 +60,10 @@ body{
   margin-bottom:5px;
 }
 
-/* ================= CONTAINER ================= */
+/* CONTAINER */
 
 .container{
-  max-width:750px;
+  max-width:900px;
   margin:auto;
   background:var(--card);
   padding:25px;
@@ -72,7 +71,7 @@ body{
   box-shadow:0 10px 25px rgba(0,0,0,0.05);
 }
 
-/* ================= SUBDIVISION ================= */
+/* SUBDIVISION */
 
 .subdivision-banner{
   text-align:center;
@@ -85,22 +84,37 @@ body{
   margin-bottom:20px;
 }
 
-/* ================= REPORT SECTION ================= */
+/* REPORT TITLE */
 
 .section-title{
   text-align:center;
   font-size:20px;
   font-weight:700;
   color:var(--primary);
-  margin-bottom:15px;
+  margin-bottom:20px;
 }
+
+/* GRID */
+
+.report-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+/* CARD */
 
 .report-card{
   border:1px solid var(--border);
   border-radius:10px;
-  padding:16px;
-  margin-top:15px;
+  padding:18px;
   background:#f9fafb;
+  transition:0.2s;
+}
+
+.report-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(0,0,0,0.08);
 }
 
 .report-card label{
@@ -108,6 +122,8 @@ body{
   display:block;
   margin-bottom:10px;
 }
+
+/* PERIOD */
 
 .period-row{
   display:flex;
@@ -117,37 +133,42 @@ body{
 
 .period-row input{
   flex:1;
-  padding:10px;
+  padding:9px;
   border-radius:8px;
   border:1px solid var(--border);
 }
 
-/* ================= BUTTONS ================= */
+/* BUTTON */
 
 button{
   width:100%;
-  padding:11px;
+  padding:10px;
   border:none;
   border-radius:8px;
   font-weight:600;
   cursor:pointer;
   background:var(--primary);
   color:white;
-  transition:0.2s;
 }
 
 button:hover{
   opacity:0.9;
 }
 
+/* LOGOUT */
+
 .logout{
   margin-top:25px;
   background:var(--danger);
 }
 
-/* ================= MOBILE ================= */
+/* MOBILE */
 
-@media(max-width:600px){
+@media(max-width:700px){
+
+  .report-grid{
+    grid-template-columns:1fr;
+  }
 
   .period-row{
     flex-direction:column;
@@ -190,6 +211,8 @@ button:hover{
 📊 रिपोर्ट डाउनलोड
 </div>
 
+<div class="report-grid">
+
 
 <!-- MACHINE REPORT -->
 
@@ -203,7 +226,7 @@ button:hover{
 </div>
 
 <button onclick="downloadReport('machine')">
-⬇️ अहवाल डाउनलोड करा
+⬇️ डाउनलोड करा
 </button>
 
 </div>
@@ -221,7 +244,7 @@ button:hover{
 </div>
 
 <button onclick="downloadReport('gps')">
-⬇️ अहवाल डाउनलोड करा
+⬇️ डाउनलोड करा
 </button>
 
 </div>
@@ -239,7 +262,7 @@ button:hover{
 </div>
 
 <button onclick="downloadReport('attendance')">
-⬇️ अहवाल डाउनलोड करा
+⬇️ डाउनलोड करा
 </button>
 
 </div>
@@ -257,8 +280,10 @@ button:hover{
 </div>
 
 <button onclick="downloadReport('pending')">
-⬇️ अहवाल डाउनलोड करा
+⬇️ डाउनलोड करा
 </button>
+
+</div>
 
 </div>
 
@@ -356,7 +381,6 @@ if(confirm("तुम्हाला लॉगआउट करायचे आ�
 localStorage.removeItem("token");
 localStorage.removeItem("subdivisionCode");
 localStorage.removeItem("subdivisionName");
-localStorage.removeItem("role");
 
 window.location.href="login.html";
 
