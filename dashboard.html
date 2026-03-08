@@ -1,54 +1,117 @@
 <!DOCTYPE html>
 <html lang="mr">
 <head>
+
 <meta charset="UTF-8">
-<title>Fuel Performance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fuel Performance Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
-body{
-font-family:system-ui;
-background:#f1f5f9;
-margin:0;
-padding:20px;
+:root{
+--primary:#1e40af;
+--bg:#f1f5f9;
+--card:#ffffff;
+--border:#e5e7eb;
 }
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:"Noto Sans Devanagari",system-ui,sans-serif;
+background:var(--bg);
+padding:15px 20px 40px;
+}
+
+/* HEADER */
+
+.gov-header{
+text-align:center;
+margin-bottom:25px;
+padding-bottom:15px;
+border-bottom:3px solid var(--primary);
+background:white;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(0,0,0,0.05);
+padding-top:15px;
+}
+
+.gov-logos{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:20px;
+margin-bottom:15px;
+}
+
+.center-logo{width:85px;}
+.side-logo{width:70px;}
+
+.gov-subtitle{
+font-size:16px;
+margin-bottom:6px;
+}
+
+.gov-title{
+font-size:24px;
+font-weight:700;
+color:var(--primary);
+}
+
+/* CONTAINER */
 
 .container{
 max-width:1200px;
 margin:auto;
 }
 
-h2{
-margin-bottom:20px;
-}
+/* FILTERS */
 
 .filters{
 display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:10px;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:12px;
 margin-bottom:20px;
+align-items:end;
 }
 
-select{
-padding:8px;
+select,input{
+padding:9px;
 font-size:14px;
+border-radius:8px;
+border:1px solid var(--border);
 }
+
+button{
+padding:10px;
+background:var(--primary);
+color:white;
+border:none;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+}
+
+/* CARDS */
 
 .cards{
 display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:10px;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:12px;
 margin-bottom:20px;
 }
 
 .card{
-background:white;
-padding:15px;
+background:var(--card);
+padding:18px;
 border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
 text-align:center;
 }
 
@@ -59,19 +122,34 @@ color:#64748b;
 }
 
 .card p{
-font-size:20px;
+font-size:24px;
 font-weight:bold;
+margin-top:5px;
 }
+
+/* STATUS */
 
 .good{color:#16a34a;}
 .warn{color:#eab308;}
 .bad{color:#dc2626;}
 
+/* CHART */
+
 .chart-box{
 background:white;
-padding:20px;
+padding:25px;
 border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* MOBILE */
+
+@media(max-width:600px){
+
+.center-logo{width:75px;}
+.side-logo{width:65px;}
+.gov-title{font-size:20px;}
+
 }
 
 </style>
@@ -79,21 +157,49 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 
 <body>
 
+<!-- HEADER -->
+
+<div class="gov-header">
+
+<div class="gov-logos">
+<img src="left-logo.png" class="side-logo">
+<img src="main-logo.png" class="center-logo">
+<img src="right-logo.png" class="side-logo">
+</div>
+
+<div class="gov-subtitle">
+मा. कार्यकारी अभियंता यांत्रिकी विभाग (को.प्र), अलोरे अंतर्गत
+</div>
+
+<div class="gov-title">
+यांत्रिकी विभाग मातीकाम माहिती प्रणाली
+</div>
+
+</div>
+
 <div class="container">
 
 <h2>Fuel Performance Dashboard</h2>
 
+<!-- FILTERS -->
+
 <div class="filters">
 
 <select id="subdivision"></select>
+
 <select id="category"></select>
+
 <select id="machine"></select>
-<select id="period">
-<option value="30">Last 30 Days</option>
-<option value="90">Last 90 Days</option>
-</select>
+
+<input type="date" id="fromDate">
+
+<input type="date" id="toDate">
+
+<button onclick="loadPerformance()">Load</button>
 
 </div>
+
+<!-- CARDS -->
 
 <div class="cards">
 
@@ -108,7 +214,7 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 </div>
 
 <div class="card">
-<h3>Total Hours/KM</h3>
+<h3>Total Hours / KM</h3>
 <p id="hours">-</p>
 </div>
 
@@ -124,15 +230,23 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 
 </div>
 
+<!-- CHART -->
+
 <div class="chart-box">
+
 <canvas id="effChart"></canvas>
+
 </div>
 
 </div>
 
 <script>
 
-const API="YOUR_WEBAPP_URL";
+const API="https://script.google.com/macros/s/AKfycbzOhvYrDFrXe6vo7hjeMkuFH0GJ2exdLNfzy9ZyPASiCu-JcmXY7yHTxixNq29tACB5Jg/exec";
+
+let machines=[];
+let subs=[];
+let chart;
 
 /* LOAD CONFIG */
 
@@ -141,19 +255,40 @@ async function loadConfig(){
 const r=await fetch(API+"?mode=config_all");
 const data=await r.json();
 
-window.machines=data.machines;
-window.subs=data.subdivisions;
+machines=data.machines;
+subs=data.subdivisions;
 
 const subSel=document.getElementById("subdivision");
 
 subs.forEach(s=>{
+
 const op=document.createElement("option");
+
 op.value=s["Subdivision Code"];
 op.textContent=s["Subdivision Name"];
+
 subSel.appendChild(op);
+
 });
 
 loadCategory();
+setDefaultDates();
+
+}
+
+/* DEFAULT DATE */
+
+function setDefaultDates(){
+
+const today=new Date();
+
+const first=new Date(today.getFullYear(),today.getMonth(),1);
+
+document.getElementById("fromDate").value=
+first.toISOString().split("T")[0];
+
+document.getElementById("toDate").value=
+today.toISOString().split("T")[0];
 
 }
 
@@ -165,10 +300,14 @@ const catSel=document.getElementById("category");
 catSel.innerHTML="";
 
 ["Machine","Vehicle"].forEach(c=>{
+
 const op=document.createElement("option");
+
 op.value=c;
 op.textContent=c;
+
 catSel.appendChild(op);
+
 });
 
 loadMachines();
@@ -190,14 +329,13 @@ machines
 .forEach(m=>{
 
 const op=document.createElement("option");
+
 op.value=m["Machine Name"];
 op.textContent=m["Machine Name"];
 
 mSel.appendChild(op);
 
 });
-
-loadPerformance();
 
 }
 
@@ -207,36 +345,33 @@ async function loadPerformance(){
 
 const sub=document.getElementById("subdivision").value;
 const machine=document.getElementById("machine").value;
-const cat=document.getElementById("category").value;
 
-const r=await fetch(API+"?mode=dashboard&subdivision="+sub);
-const data=await r.json();
+const fromDate=document.getElementById("fromDate").value;
+const toDate=document.getElementById("toDate").value;
 
-const rows=data.filter(d=>d["मशीन"]===machine);
+if(!fromDate || !toDate){
 
-let hours=0;
-let diesel=0;
-
-rows.forEach(r=>{
-hours+=Number(r["Dashboard एकूण (तास/km)"]||0);
-diesel+=Number(r["डिझेल (लिटर)"]||0);
-});
-
-const master=machines.find(m=>m["Machine Name"]===machine);
-
-const expected=Number(master["Diesel Average"]);
-
-let actual;
-
-if(cat==="Machine"){
-
-actual=diesel/hours;
-
-}else{
-
-actual=hours/diesel;
+alert("Date range select करा");
+return;
 
 }
+
+const r=await fetch(
+API+"?mode=fuel_dashboard&subdivision="+sub+
+"&from="+fromDate+
+"&to="+toDate
+);
+
+const data=await r.json();
+
+const row=data.find(d=>d.machine===machine);
+
+if(!row)return;
+
+const hours=row.hours;
+const diesel=row.diesel;
+const actual=row.actual;
+const expected=row.expected;
 
 document.getElementById("expected").innerText=expected.toFixed(2);
 document.getElementById("actual").innerText=actual.toFixed(2);
@@ -248,7 +383,7 @@ document.getElementById("diesel").innerText=diesel.toFixed(1);
 let status="good";
 let txt="Good";
 
-if(cat==="Machine"){
+if(row.category==="Machine"){
 
 if(actual>expected*1.1){status="bad";txt="High";}
 else if(actual>expected){status="warn";txt="Slight High";}
@@ -261,45 +396,34 @@ else if(actual<expected){status="warn";txt="Low";}
 }
 
 const st=document.getElementById("status");
+
 st.innerText=txt;
 st.className=status;
 
 /* CHART */
 
-const labels=[];
-const vals=[];
-
-rows.slice(-15).forEach(r=>{
-
-labels.push(r["दिनांक"]);
-
-let v;
-
-if(cat==="Machine"){
-
-v=r["डिझेल (लिटर)"]/r["Dashboard एकूण (तास/km)"];
-
-}else{
-
-v=r["Dashboard एकूण (तास/km)"]/r["डिझेल (लिटर)"];
-
+if(chart){
+chart.destroy();
 }
 
-vals.push(v);
+chart=new Chart(document.getElementById("effChart"),{
 
-});
-
-new Chart(document.getElementById("effChart"),{
-
-type:"line",
+type:"bar",
 
 data:{
-labels:labels,
+labels:["Expected","Actual"],
 datasets:[{
-label:"Efficiency",
-data:vals,
+label:"Fuel Efficiency",
+data:[expected,actual],
 borderWidth:2
 }]
+},
+
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+}
 }
 
 });
@@ -310,7 +434,6 @@ borderWidth:2
 
 document.getElementById("subdivision").onchange=loadMachines;
 document.getElementById("category").onchange=loadMachines;
-document.getElementById("machine").onchange=loadPerformance;
 
 loadConfig();
 
