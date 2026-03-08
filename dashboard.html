@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<title>Fuel Performance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family:system-ui;
+background:#f1f5f9;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+.filters{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-bottom:20px;
+}
+
+select{
+padding:8px;
+font-size:14px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:10px;
+margin-bottom:20px;
+}
+
+.card{
+background:white;
+padding:15px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+.card h3{
+margin:5px 0;
+font-size:14px;
+color:#64748b;
+}
+
+.card p{
+font-size:20px;
+font-weight:bold;
+}
+
+.good{color:#16a34a;}
+.warn{color:#eab308;}
+.bad{color:#dc2626;}
+
+.chart-box{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Fuel Performance Dashboard</h2>
+
+<div class="filters">
+
+<select id="subdivision"></select>
+<select id="category"></select>
+<select id="machine"></select>
+<select id="period">
+<option value="30">Last 30 Days</option>
+<option value="90">Last 90 Days</option>
+</select>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+<h3>Expected Avg</h3>
+<p id="expected">-</p>
+</div>
+
+<div class="card">
+<h3>Actual Avg</h3>
+<p id="actual">-</p>
+</div>
+
+<div class="card">
+<h3>Total Hours/KM</h3>
+<p id="hours">-</p>
+</div>
+
+<div class="card">
+<h3>Total Diesel</h3>
+<p id="diesel">-</p>
+</div>
+
+<div class="card">
+<h3>Status</h3>
+<p id="status">-</p>
+</div>
+
+</div>
+
+<div class="chart-box">
+<canvas id="effChart"></canvas>
+</div>
+
+</div>
+
+<script>
+
+const API="YOUR_WEBAPP_URL";
+
+/* LOAD CONFIG */
+
+async function loadConfig(){
+
+const r=await fetch(API+"?mode=config_all");
+const data=await r.json();
+
+window.machines=data.machines;
+window.subs=data.subdivisions;
+
+const subSel=document.getElementById("subdivision");
+
+subs.forEach(s=>{
+const op=document.createElement("option");
+op.value=s["Subdivision Code"];
+op.textContent=s["Subdivision Name"];
+subSel.appendChild(op);
+});
+
+loadCategory();
+
+}
+
+/* CATEGORY */
+
+function loadCategory(){
+
+const catSel=document.getElementById("category");
+catSel.innerHTML="";
+
+["Machine","Vehicle"].forEach(c=>{
+const op=document.createElement("option");
+op.value=c;
+op.textContent=c;
+catSel.appendChild(op);
+});
+
+loadMachines();
+
+}
+
+/* MACHINE LIST */
+
+function loadMachines(){
+
+const sub=document.getElementById("subdivision").value;
+const cat=document.getElementById("category").value;
+
+const mSel=document.getElementById("machine");
+mSel.innerHTML="";
+
+machines
+.filter(m=>m["Subdivision Code"]===sub && m["Category"]===cat)
+.forEach(m=>{
+
+const op=document.createElement("option");
+op.value=m["Machine Name"];
+op.textContent=m["Machine Name"];
+
+mSel.appendChild(op);
+
+});
+
+loadPerformance();
+
+}
+
+/* PERFORMANCE */
+
+async function loadPerformance(){
+
+const sub=document.getElementById("subdivision").value;
+const machine=document.getElementById("machine").value;
+const cat=document.getElementById("category").value;
+
+const r=await fetch(API+"?mode=dashboard&subdivision="+sub);
+const data=await r.json();
+
+const rows=data.filter(d=>d["मशीन"]===machine);
+
+let hours=0;
+let diesel=0;
+
+rows.forEach(r=>{
+hours+=Number(r["Dashboard एकूण (तास/km)"]||0);
+diesel+=Number(r["डिझेल (लिटर)"]||0);
+});
+
+const master=machines.find(m=>m["Machine Name"]===machine);
+
+const expected=Number(master["Diesel Average"]);
+
+let actual;
+
+if(cat==="Machine"){
+
+actual=diesel/hours;
+
+}else{
+
+actual=hours/diesel;
+
+}
+
+document.getElementById("expected").innerText=expected.toFixed(2);
+document.getElementById("actual").innerText=actual.toFixed(2);
+document.getElementById("hours").innerText=hours.toFixed(1);
+document.getElementById("diesel").innerText=diesel.toFixed(1);
+
+/* STATUS */
+
+let status="good";
+let txt="Good";
+
+if(cat==="Machine"){
+
+if(actual>expected*1.1){status="bad";txt="High";}
+else if(actual>expected){status="warn";txt="Slight High";}
+
+}else{
+
+if(actual<expected*0.9){status="bad";txt="Poor";}
+else if(actual<expected){status="warn";txt="Low";}
+
+}
+
+const st=document.getElementById("status");
+st.innerText=txt;
+st.className=status;
+
+/* CHART */
+
+const labels=[];
+const vals=[];
+
+rows.slice(-15).forEach(r=>{
+
+labels.push(r["दिनांक"]);
+
+let v;
+
+if(cat==="Machine"){
+
+v=r["डिझेल (लिटर)"]/r["Dashboard एकूण (तास/km)"];
+
+}else{
+
+v=r["Dashboard एकूण (तास/km)"]/r["डिझेल (लिटर)"];
+
+}
+
+vals.push(v);
+
+});
+
+new Chart(document.getElementById("effChart"),{
+
+type:"line",
+
+data:{
+labels:labels,
+datasets:[{
+label:"Efficiency",
+data:vals,
+borderWidth:2
+}]
+}
+
+});
+
+}
+
+/* EVENTS */
+
+document.getElementById("subdivision").onchange=loadMachines;
+document.getElementById("category").onchange=loadMachines;
+document.getElementById("machine").onchange=loadPerformance;
+
+loadConfig();
+
+</script>
+
+</body>
+</html>
