@@ -115,7 +115,14 @@ button:disabled{
 button:hover{
   opacity:0.9;
 }
+.back-btn{
+margin-top:10px;
+background:#6b7280;
+}
 
+.back-btn:hover{
+opacity:0.9;
+}
 .error{
   color:var(--danger);
   text-align:center;
@@ -160,7 +167,10 @@ button:hover{
 <input type="password" id="password" placeholder="Password" autocomplete="off">
 
 <button id="loginBtn" onclick="login()">Login</button>
-
+  
+<button class="back-btn" onclick="goHome()">
+⬅ मुख्य पृष्ठावर जा
+</button>
 <div id="errorMsg" class="error"></div>
 
 </div>
@@ -229,7 +239,9 @@ localStorage.setItem("role", data.role);
     btn.disabled = false;
   }
 }
-
+function goHome(){
+window.location.href="index.html";
+}
 </script>
 
 </body>
