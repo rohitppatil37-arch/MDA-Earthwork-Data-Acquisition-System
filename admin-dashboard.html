@@ -410,14 +410,14 @@ document.querySelectorAll("button").forEach(b=>b.disabled=false);
 return;
 }
 
-const url=
-API_URL+
-"?mode=report"+
-"&type="+type+
-"&from="+from+
-"&to="+to+
-"&subdivision="+sub+
-"&token="+token;
+const url = API_URL +
+  "?mode=report" +
+  "&type=" + (type === "machine" ? "pdf" : type) +  // ← ही line replace करा
+  "&from=" + from +
+  "&to=" + to +
+  "&subdivision=" + sub +
+  "&token=" + token;
+
 
 fetch(url)
 .then(res=>res.json())
@@ -432,7 +432,7 @@ alert(data.error);
 return;
 }
 
-saveBase64File(data.file,data.name);
+saveBase64File(data.file, data.name);
 })
 .catch(()=>{
 document.getElementById("reportStatus").style.display="none";
@@ -442,38 +442,36 @@ document.querySelectorAll("button").forEach(b=>b.disabled=false);
 alert("Report generate करताना समस्या आली.");
 });
 }
-function saveBase64File(base64,name){
-
-const bytes = atob(base64);
-
-const array = new Uint8Array(bytes.length);
-
-for(let i=0;i<bytes.length;i++){
-array[i] = bytes.charCodeAt(i);
+function saveBase64File(base64, name) {
+  // PDF साठी updated function
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  
+  const byteArray = new Uint8Array(byteNumbers);
+  
+  // PDF MIME type (Excel च्या ऐवजी)
+  const blob = new Blob([byteArray], { 
+    type: 'application/pdf'  // ← येथे बदल!
+  });
+  
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = name || 'Report.pdf';  // ← .xlsx → .pdf
+  document.body.appendChild(link);
+  link.click();
+  
+  setTimeout(() => {
+    URL.revokeObjectURL(link.href);
+    document.body.removeChild(link);
+  }, 2000);
+  
+  console.log('✅ PDF Download Complete:', name);
 }
 
-const blob = new Blob(
-[array],
-{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
-);
-
-const link=document.createElement("a");
-
-link.href=URL.createObjectURL(blob);
-
-link.download=name || "Report.xlsx";
-
-document.body.appendChild(link);
-
-link.click();
-
-setTimeout(()=>{
-URL.revokeObjectURL(link.href);
-},2000);
-
-document.body.removeChild(link);
-
-}
 function logout(){
 
 if(confirm("तुम्हाला लॉगआउट करायचे आहे का?")){
