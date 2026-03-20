@@ -441,8 +441,6 @@ function resetSelect(selectElement, placeholder) {
   selectElement.innerHTML = "";
   addOption(selectElement, "", placeholder);
 }
-attachEventListeners();
-initVoiceInput();
 
 // 👇 ADD HERE
 getEl("mainForm")?.addEventListener("reset", () => {
