@@ -28,7 +28,10 @@ async function initApp() {
     handleDieselLogic();
 
     attachEventListeners();
+
+// 👇 ADD THIS
 initVoiceInput();
+    
   } catch (err) {
 
     console.error("❌ INIT FAILED:", err);
@@ -586,6 +589,10 @@ if (timeToMinutes(shift2End) <= timeToMinutes(shift2Start)) {
 closeErrorBox();
 return true;
 }
+// ===============================
+// 🎙️ VOICE INPUT (LOCATION ONLY)
+// ===============================
+
 let recognition = null;
 let isRecording = false;
 
@@ -595,9 +602,11 @@ function initVoiceInput(){
   const input = getEl("locationFromTo");
   const status = getEl("voiceStatus");
 
+  // element exist नाही तर skip
   if(!btn || !input) return;
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if(!SpeechRecognition){
     if(status) status.innerText = "❌ Voice support नाही";
@@ -606,7 +615,8 @@ function initVoiceInput(){
 
   recognition = new SpeechRecognition();
 
-  recognition.lang = "hi-IN"; // best for mixed speech
+  // 🔥 Field-tested setting
+  recognition.lang = "hi-IN"; // Marathi + Hindi mix better
   recognition.interimResults = false;
   recognition.continuous = false;
 
@@ -622,7 +632,7 @@ function initVoiceInput(){
 
     const text = event.results[0][0].transcript.trim();
 
-    // 👉 NO parsing, NO formatting
+    // 👉 ONLY fill location (NO parsing)
     input.value = text;
 
     if(status) status.innerText = "✅ झाले";
@@ -642,6 +652,7 @@ function initVoiceInput(){
   // 🎯 CLICK
   btn.addEventListener("click", () => {
 
+    // 👉 Only if vehicle section visible
     const vehicleVisible =
       getEl("vehicleSection") &&
       getEl("vehicleSection").offsetParent !== null;
@@ -657,7 +668,7 @@ function initVoiceInput(){
       try{
         recognition.start();
       }catch(e){
-        console.log(e);
+        console.log("Voice error:", e);
       }
     }
 
