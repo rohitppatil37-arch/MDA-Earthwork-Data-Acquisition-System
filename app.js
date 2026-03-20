@@ -651,10 +651,17 @@ btn.dataset.voiceInit = "true";
   input.focus(); // ✅ ADD THIS
 };
 
-  // ❌ ERROR
-  recognition.onerror = () => {
-    if(status) status.innerText = "❌ पुन्हा प्रयत्न करा";
-  };
+  recognition.onerror = (e) => {
+  console.log("Voice error:", e);
+
+  if(status){
+    if(e.error === "not-allowed"){
+      status.innerText = "🚫 Mic permission द्या";
+    } else {
+      status.innerText = "❌ पुन्हा प्रयत्न करा";
+    }
+  }
+};
 
   // ⏹ END
   recognition.onend = () => {
