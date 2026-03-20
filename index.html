@@ -184,6 +184,24 @@ button{
     transform:translate(50%, 0);
   }
 }
+  .mic-btn{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  cursor:pointer;
+}
+
+.mic-btn.recording{
+  background:red;
+  color:white;
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  50%{opacity:0.6;}
+}
   /* GOVERNMENT HEADER */
 .gov-header{
   text-align:center;
@@ -453,7 +471,14 @@ padding-top: 15px;
 
 <div class="section">
 <label>📍 या ठिकाणापासून ते त्या ठिकाणापर्यंत</label>
-<input type="text" id="locationFromTo">
+
+<div style="display:flex;gap:8px;align-items:center;">
+  <input type="text" id="locationFromTo" style="flex:1">
+  
+  <button type="button" id="micBtn" class="mic-btn">🎙️</button>
+</div>
+
+<div id="voiceStatus" style="font-size:12px;color:#1e40af;margin-top:5px;"></div>
 </div>
 
 </div>
