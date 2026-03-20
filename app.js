@@ -56,10 +56,15 @@ getEl("mainForm")?.addEventListener("reset", () => {
   getEl("machineType")?.addEventListener("change", handleMachineTypeChange);
 
   getEl("machineName")?.addEventListener("change", () => {
-    const subCode = getValue("subdivision");
-    const machineType = getValue("machineType");
-    toggleFormFields(machineType, subCode);
-  });
+
+  const subCode = getValue("subdivision");
+  const machineName = getValue("machineName");
+  const machineType = getValue("machineType");
+
+  populateStaff(subCode, machineName); // 👈 MAIN CHANGE
+  toggleFormFields(machineType, subCode);
+
+});
 
   getEl("startReading")?.addEventListener("input", calculateTotalReading);
   getEl("endReading")?.addEventListener("input", calculateTotalReading);
@@ -202,8 +207,7 @@ function handleMachineTypeChange() {
   machines.forEach(m =>
     addOption(getEl("machineName"), m["Machine Name"], m["Machine Name"])
   );
-
-  populateStaff(subCode, machineType);
+  
   toggleFormFields(machineType, subCode);
 }
 
@@ -247,22 +251,34 @@ function toggleFormFields(machineType, subCode) {
   }
 }
 
-function populateStaff(subCode, machineType) {
+function populateStaff(subCode, machineName) {
 
-  if (!CONFIG || !CONFIG.staff) return;
+  if (!CONFIG || !CONFIG.staff || !CONFIG.machines) return;
+
+  const staffSelect = getEl("staffName");
+  resetSelect(staffSelect, "चालक / ऑपरेटर निवडा...");
+
+  const machineData = CONFIG.machines.find(m =>
+    String(m["Subdivision Code"]).trim() === String(subCode).trim() &&
+    String(m["Machine Name"]).trim() === String(machineName).trim()
+  );
+
+  if (!machineData) return;
+
+  const category = String(machineData["Category"] || "")
+    .trim()
+    .toLowerCase();
 
   const roleRequired =
-    machineType === "डोझर/एस्कॅव्हेटर"
-      ? "Operator"
-      : "Driver";
+    category === "machine" ? "Operator" : "Driver";
 
   const staff = CONFIG.staff.filter(s =>
-    s["Subdivision Code"] === subCode &&
-    s["Role"] === roleRequired
+    String(s["Subdivision Code"]).trim() === String(subCode).trim() &&
+    String(s["Role"]).trim().toLowerCase() === roleRequired.toLowerCase()
   );
 
   staff.forEach(person =>
-    addOption(getEl("staffName"), person["Name"], person["Name"])
+    addOption(staffSelect, person["Name"], person["Name"])
   );
 }
 
